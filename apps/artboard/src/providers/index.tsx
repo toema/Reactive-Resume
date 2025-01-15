@@ -4,14 +4,17 @@ import { Outlet } from "react-router-dom";
 import { useArtboardStore } from "../store/artboard";
 
 export const Providers = () => {
-  const resume = useArtboardStore((state) => state.resume);
+  const setMode = useArtboardStore((state) => state.setMode);
   const setResume = useArtboardStore((state) => state.setResume);
+  const setPortfolio = useArtboardStore((state) => state.setPortfolio);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
 
+      if (event.data.type === "SET_MODE") setMode(event.data.payload);
       if (event.data.type === "SET_RESUME") setResume(event.data.payload);
+      if (event.data.type === "SET_PORTFOLIO") setPortfolio(event.data.payload);
       if (event.data.type === "SET_THEME") {
         event.data.payload === "dark"
           ? document.documentElement.classList.add("dark")
@@ -19,26 +22,12 @@ export const Providers = () => {
       }
     };
 
-    const resumeData = window.localStorage.getItem("resume");
-    if (resumeData) {
-      setResume(JSON.parse(resumeData));
-      return;
-    }
-
     window.addEventListener("message", handleMessage);
 
     return () => {
       window.removeEventListener("message", handleMessage);
     };
-  }, [setResume]);
-
-  // Only for testing, in production this will be fetched from window.postMessage
-  // useEffect(() => {
-  //   setResume(sampleResume);
-  // }, [setResume]);
-
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (!resume) return null;
+  }, [setMode, setResume, setPortfolio]);
 
   return <Outlet />;
 };

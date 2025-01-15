@@ -33,8 +33,8 @@ if [ -f "./prisma/schema.prisma" ]; then
     copy_file "./prisma/schema.prisma"
 fi
 
-git add ABFiles
+# git add clientABFiles
 
-echo "Files copied from src to ABFiles, paths added as comments, and extensions changed to .txt"
+echo "Files copied from src to clientABFiles, paths added as comments, and extensions changed to .txt"
 echo "prisma/schema.prisma has been included if it exists"
 echo "Files with the same name have been numbered to avoid conflicts"
