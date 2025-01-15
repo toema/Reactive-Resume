@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { t } from "@lingui/macro";
-import { Plus, CopySimple, TrashSimple } from "@phosphor-icons/react";
+import { Plus, CopySimple, PencilSimple } from "@phosphor-icons/react";
 import { createPortfolioSchema, PortfolioDto } from "@reactive-resume/dto";
 import {
   AlertDialog,
@@ -26,6 +26,7 @@ import {
   FormMessage,
   Input,
 } from "@reactive-resume/ui";
+import { kebabCase } from "@reactive-resume/utils";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -67,7 +68,11 @@ export const PortfolioDialog = () => {
 
   const onSubmit = async (values: FormValues) => {
     if (isCreate) {
-      await createPortfolio({ slug: values.slug, title: values.title, visibility: "private" });
+      await createPortfolio({ 
+        title: values.title,
+        slug: values.slug,
+        visibility: "private",
+      });
     }
 
     if (isUpdate) {
@@ -87,6 +92,7 @@ export const PortfolioDialog = () => {
         title: values.title,
         slug: values.slug,
         data: payload.item.data,
+        visibility: "private",
       });
     }
 
