@@ -15,6 +15,8 @@ node_modules
 .settings/
 *.sublime-workspace
 
+# AI
+**/ABFiles*/
 # IDE - VSCode
 .vs/*
 .vscode/*

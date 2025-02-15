@@ -291,6 +291,7 @@ export const sampleResume: ResumeData = {
     custom: {},
   },
   metadata: {
+    type: "resume",
     template: "glalie",
     layout: [
       [

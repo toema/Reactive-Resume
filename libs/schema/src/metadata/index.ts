@@ -9,6 +9,7 @@ export const defaultLayout = [
 
 // Schema
 export const metadataSchema = z.object({
+  type: z.enum(["resume", "portfolio"]).default("resume"),
   template: z.string().default("rhyhorn"),
   layout: z.array(z.array(z.array(z.string()))).default(defaultLayout), // pages -> columns -> sections
   css: z.object({
@@ -47,6 +48,7 @@ export type Metadata = z.infer<typeof metadataSchema>;
 
 // Defaults
 export const defaultMetadata: Metadata = {
+  type: "resume",
   template: "rhyhorn",
   layout: defaultLayout,
   css: {
