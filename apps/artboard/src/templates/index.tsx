@@ -10,6 +10,7 @@ import { Kakuna } from "./kakuna";
 import { Leafish } from "./leafish";
 import { Nosepass } from "./nosepass";
 import { Onyx } from "./onyx";
+import { PortfolioOnyx } from "./PortfolioOnyx";
 import { Pikachu } from "./pikachu";
 import { Rhyhorn } from "./rhyhorn";
 
@@ -17,6 +18,9 @@ export const getTemplate = (template: Template) => {
   switch (template) {
     case "azurill": {
       return Azurill;
+    }
+    case "PortfolioOnyx": {
+      return PortfolioOnyx;
     }
     case "bronzor": {
       return Bronzor;
