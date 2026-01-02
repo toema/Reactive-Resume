@@ -44,6 +44,7 @@ import { Button } from "./button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./form";
 import { Input } from "./input";
 import { Popover, PopoverContent } from "./popover";
+import { ScrollArea } from "./scroll-area";
 import { Skeleton } from "./skeleton";
 import { Toggle } from "./toggle";
 import { Tooltip } from "./tooltip";
@@ -210,6 +211,8 @@ const Toolbar = ({ editor }: { editor: Editor }) => {
         </Toggle>
       </Tooltip>
 
+      <div className="my-auto h-5 w-px bg-border" />
+
       <Tooltip content="Hyperlink">
         <Button type="button" size="sm" variant="ghost" className="px-2" onClick={setLink}>
           <LinkSimpleIcon />
@@ -241,6 +244,8 @@ const Toolbar = ({ editor }: { editor: Editor }) => {
           <CodeBlockIconImport />
         </Toggle>
       </Tooltip>
+
+      <div className="my-auto h-5 w-px bg-border" />
 
       <Tooltip content="Heading 1">
         <Toggle
@@ -292,6 +297,8 @@ const Toolbar = ({ editor }: { editor: Editor }) => {
           <ParagraphIconImport />
         </Toggle>
       </Tooltip>
+
+      <div className="my-auto h-5 w-px bg-border" />
 
       <Tooltip content="Align Left">
         <Toggle
@@ -345,6 +352,8 @@ const Toolbar = ({ editor }: { editor: Editor }) => {
         </Toggle>
       </Tooltip>
 
+      <div className="my-auto h-5 w-px bg-border" />
+
       <Tooltip content="Bullet List">
         <Toggle
           size="sm"
@@ -397,6 +406,8 @@ const Toolbar = ({ editor }: { editor: Editor }) => {
         </Button>
       </Tooltip>
 
+      <div className="my-auto h-5 w-px bg-border" />
+
       <Popover>
         <Tooltip content="Insert Image">
           <PopoverTrigger asChild>
@@ -435,6 +446,8 @@ const Toolbar = ({ editor }: { editor: Editor }) => {
           <MinusIcon />
         </Button>
       </Tooltip>
+
+      <div className="my-auto h-5 w-px bg-border" />
 
       <Tooltip content="Undo">
         <Button
@@ -491,7 +504,7 @@ export const RichInput = forwardRef<Editor, RichInputProps>(
       editorProps: {
         attributes: {
           class: cn(
-            "prose prose-sm prose-zinc max-h-[200px] max-w-none overflow-y-scroll dark:prose-invert focus:outline-none [&_*]:my-2",
+            "prose prose-sm prose-zinc max-h-[200px] max-w-none dark:prose-invert focus:outline-none [&_*]:my-2",
             editorClassName,
           ),
         },
@@ -514,15 +527,17 @@ export const RichInput = forwardRef<Editor, RichInputProps>(
       <div>
         {!hideToolbar && <Toolbar editor={editor} />}
 
-        <EditorContent
-          editor={editor}
-          className={cn(
-            "grid min-h-[160px] w-full rounded-sm border bg-transparent px-3 py-2 text-sm placeholder:opacity-80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50",
-            hideToolbar && "pt-2",
-            className,
-          )}
-          {...props}
-        />
+        <ScrollArea orientation="vertical" className="rounded-sm border p-3 pt-0">
+          <EditorContent
+            editor={editor}
+            className={cn(
+              "grid min-h-[140px] w-full bg-transparent text-sm placeholder:opacity-80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50",
+              hideToolbar && "pt-2",
+              className,
+            )}
+            {...props}
+          />
+        </ScrollArea>
 
         {footer?.(editor)}
       </div>
