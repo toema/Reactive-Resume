@@ -1,0 +1,8 @@
+// File: @reactive-resume/artboard
+      /src/types/template.ts
+import type { SectionKey } from "@reactive-resume/schema";
+
+export type TemplateProps = {
+  columns: SectionKey[][];
+  isFirstPage?: boolean;
+};

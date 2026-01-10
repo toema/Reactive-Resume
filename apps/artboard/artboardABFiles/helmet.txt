@@ -1,0 +1,7 @@
+// File: @reactive-resume/artboard
+      /src/constants/helmet.ts
+import { HelmetData } from "react-helmet-async";
+
+export const helmetData = new HelmetData({});
+
+export const helmetContext = helmetData.context;

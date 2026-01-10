@@ -1,0 +1,7 @@
+// File: @reactive-resume/server
+      /src/auth/guards/two-factor.guard.ts
+import { Injectable } from "@nestjs/common";
+import { AuthGuard } from "@nestjs/passport";
+
+@Injectable()
+export class TwoFactorGuard extends AuthGuard("two-factor") {}
