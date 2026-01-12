@@ -65,8 +65,10 @@ export const Hero: React.FC<HeroProps> = ({
           )}
 
           {/* Name & Tagline */}
-          <h1 className="mb-4 text-4xl font-bold">{name}</h1>
-          <h1 className="text-xl opacity-75">{headline}</h1>
+          <h1 className="mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-5xl font-extrabold tracking-tight text-transparent sm:text-6xl">
+            {name}
+          </h1>
+          <h1 className="text-xl font-medium opacity-75 sm:text-2xl">{headline}</h1>
         </div>
       </div>
     </section>
