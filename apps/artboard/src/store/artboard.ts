@@ -1,4 +1,4 @@
-import { PortfolioData, ResumeData } from "@reactive-resume/schema";
+import { PortfolioData, ResumeData, defaultPortfolioData, defaultResumeData } from "@reactive-resume/schema";
 import { create } from "zustand";
 
 type ArtboardStore = {
@@ -10,17 +10,20 @@ type ArtboardStore = {
   setPortfolio: (portfolio: PortfolioData) => void;
 };
 
-export const useArtboardStore = create<ArtboardStore>()((set) => ({
+export const useArtboardStore = create<ArtboardStore>()((set, get) => ({
   mode: "resume",
-  resume: null as unknown as ResumeData,
-  portfolio: null as unknown as PortfolioData,
+  resume: defaultResumeData,
+  portfolio: defaultPortfolioData,
   setMode: (mode) => {
+    console.log("Artboard: Setting mode to", mode);
     set({ mode });
   },
   setResume: (resume) => {
+    console.log("Artboard: Setting resume data", resume);
     set({ resume });
   },
   setPortfolio: (portfolio) => {
+    console.log("Artboard: Setting portfolio data", portfolio);
     set({ portfolio });
   },
 }));

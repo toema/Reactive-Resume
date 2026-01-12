@@ -32,13 +32,19 @@ export const PublicPage = () => {
       ? "a4" // or your preferred default for portfolio
       : data.data.metadata.page.format;
 
-  const updateDataInFrame = useCallback(() => {
-    if (!frameRef.current?.contentWindow) return;
-    const message = { type: "SET_DATA", payload: data };
-    (() => {
-      frameRef.current.contentWindow.postMessage(message, "*");
-    })();
-  }, [frameRef, data]);
+ const updateDataInFrame = useCallback(() => {
+  if (!frameRef.current?.contentWindow) return;
+  
+  let message;
+  if (mode === "portfolio") {
+    message = { type: "SET_PORTFOLIO", payload: data };
+  } else {
+    message = { type: "SET_RESUME", payload: data };
+  }
+  
+  console.log("Public page sending message:", message);
+  frameRef.current.contentWindow.postMessage(message, "*");
+}, [frameRef, data, mode]);
 
   useEffect(() => {
     if (!frameRef.current) return;

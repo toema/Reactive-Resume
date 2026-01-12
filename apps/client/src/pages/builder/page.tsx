@@ -2,7 +2,7 @@ import { t } from "@lingui/macro";
 import { PortfolioDto, ResumeDto } from "@reactive-resume/dto";
 import { useCallback, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { LoaderFunction, redirect } from "react-router-dom";
+import { LoaderFunction, redirect, useSearchParams } from "react-router-dom";
 
 import { toast } from "@/client/hooks/use-toast";
 import { queryClient } from "@/client/libs/query-client";
@@ -13,32 +13,56 @@ import { usePortfolioStore } from "@/client/stores/portfolio";
 import { useResumeStore } from "@/client/stores/resume";
 
 export const BuilderPage = () => {
+  const [searchParams] = useSearchParams();
+  const mode = searchParams.get("mode") ?? "resume";
+
   const frameRef = useBuilderStore((state) => state.frame.ref);
   const setFrameRef = useBuilderStore((state) => state.frame.setRef);
 
   const resume = useResumeStore((state) => state.resume);
-  const title = useResumeStore((state) => state.resume.title);
+  const portfolio = usePortfolioStore((state) => state.portfolio);
 
-  const updateResumeInFrame = useCallback(() => {
+  // Get title based on mode
+  const title = mode === "portfolio" 
+    ? (portfolio?.title || t`Untitled Portfolio`)
+    : (resume?.title || t`Untitled Resume`);
+
+  const updateDataInFrame = useCallback(() => {
     if (!frameRef?.contentWindow) return;
-    const message = { type: "SET_RESUME", payload: resume.data };
-    (() => {
-      frameRef.contentWindow.postMessage(message, "*");
-    })();
-  }, [frameRef, resume.data]);
 
-  // Send resume data to iframe on initial load
+    let message;
+    if (mode === "portfolio") {
+      message = { type: "SET_PORTFOLIO", payload: portfolio.data };
+    } else {
+      message = { type: "SET_RESUME", payload: resume.data };
+    }
+
+    console.log("Sending message to artboard:", message);
+    frameRef.contentWindow.postMessage(message, "*");
+  }, [frameRef, mode, resume.data, portfolio.data]);
+
+  // Send data to iframe on initial load
   useEffect(() => {
     if (!frameRef) return;
-    frameRef.addEventListener("load", updateResumeInFrame);
-    return () => {
-      frameRef.removeEventListener("load", updateResumeInFrame);
+    
+    const handleLoad = () => {
+      console.log("Iframe loaded, sending data...");
+      updateDataInFrame();
     };
-  }, [frameRef]);
 
-  // Send resume data to iframe on change of resume data
-  useEffect(updateResumeInFrame, [resume.data]);
+    frameRef.addEventListener("load", handleLoad);
+    return () => {
+      frameRef.removeEventListener("load", handleLoad);
+    };
+  }, [frameRef, updateDataInFrame]);
+
+  // Send data to iframe when data changes
+  useEffect(() => {
+    updateDataInFrame();
+  }, [updateDataInFrame]);
+
   const titleString = title || t`Untitled`;
+
   return (
     <>
       <Helmet>
@@ -48,7 +72,7 @@ export const BuilderPage = () => {
       <iframe
         ref={setFrameRef}
         title={titleString}
-        src="/artboard/builder"
+        src={`/artboard/builder?mode=${mode}`}
         className="mt-16 w-screen"
         style={{ height: `calc(100vh - 64px)` }}
       />

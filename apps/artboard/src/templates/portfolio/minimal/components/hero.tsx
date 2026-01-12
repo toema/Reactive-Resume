@@ -3,7 +3,7 @@ import { Picture } from "../../../../components/picture";
 
 interface HeroProps {
   name: string;
-  tagline: string;
+  headline: string;
   picture: {
     url: string;
     size: number;
@@ -27,7 +27,7 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({
   name,
-  tagline,
+  headline,
   picture,
   banner,
 }) => {
@@ -66,7 +66,7 @@ export const Hero: React.FC<HeroProps> = ({
 
           {/* Name & Tagline */}
           <h1 className="mb-4 text-4xl font-bold">{name}</h1>
-          <p className="text-xl opacity-75">{tagline}</p>
+          <h1 className="text-xl opacity-75">{headline}</h1>
         </div>
       </div>
     </section>

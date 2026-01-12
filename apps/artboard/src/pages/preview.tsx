@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { SectionKey } from "@reactive-resume/schema";
 import { PortfolioTemplate, Template } from "@reactive-resume/utils";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { Page } from "../components/page";
@@ -15,29 +15,70 @@ export const PreviewLayout = () => {
   const [searchParams] = useSearchParams();
   const mode = searchParams.get("mode") ?? "resume";
 
-  // Get data with null checks
+  // Get data from store
   const resumeData = useArtboardStore((state) => state.resume);
   const portfolioData = useArtboardStore((state) => state.portfolio);
 
-  // Get layout and template based on mode
-  const layout =
-    mode === "portfolio" ? portfolioData.metadata.layout.sections : resumeData.metadata.layout;
-  console.log("layout", layout);
-  const template =
-    mode === "portfolio"
-      ? (portfolioData.metadata.template as PortfolioTemplate)
-      : (resumeData.metadata.template as Template);
+  // Debug logging
+  useEffect(() => {
+    console.log("PreviewLayout - Mode:", mode);
+    console.log("PreviewLayout - Resume data:", resumeData);
+    console.log("PreviewLayout - Portfolio data:", portfolioData);
+  }, [mode, resumeData, portfolioData]);
+
+  // Get layout and template based on mode with proper null checks
+  const layout = useMemo(() => {
+    if (mode === "portfolio") {
+      return portfolioData?.metadata?.layout?.sections || [];
+    }
+    return resumeData?.metadata?.layout || [];
+  }, [mode, portfolioData, resumeData]);
+
+  const template = useMemo(() => {
+    if (mode === "portfolio") {
+      return portfolioData?.metadata?.template as PortfolioTemplate;
+    }
+    return resumeData?.metadata?.template as Template;
+  }, [mode, portfolioData, resumeData]);
+
+  console.log("PreviewLayout - Layout:", layout);
+  console.log("PreviewLayout - Template:", template);
 
   const TemplateComponent = useMemo(() => {
     if (mode === "portfolio") {
-      return getPortfolioTemplate(template as PortfolioTemplate);
+      const component = getPortfolioTemplate(template as string);
+      console.log("Portfolio template component:", component);
+      return component;
     }
     return getTemplate(template as Template);
   }, [template, mode]);
 
   // Portfolio Preview
   if (mode === "portfolio") {
+    if (!portfolioData) {
+      console.log("No portfolio data available");
+      return (
+        <Page mode="preview" pageNumber={1}>
+          <div className="flex items-center justify-center h-64">
+            <p>Loading portfolio...</p>
+          </div>
+        </Page>
+      );
+    }
+
+    if (!TemplateComponent) {
+      console.error("Portfolio template not found:", template);
+      return (
+        <Page mode="preview" pageNumber={1}>
+          <div className="flex items-center justify-center h-64">
+            <p>Portfolio template "{template}" not found</p>
+          </div>
+        </Page>
+      );
+    }
+
     const PortfolioTemplate = TemplateComponent as React.ComponentType<PortfolioTemplateProps>;
+    
     return (
       <Page mode="preview" pageNumber={1}>
         <PortfolioTemplate data={portfolioData} />
@@ -45,7 +86,31 @@ export const PreviewLayout = () => {
     );
   }
 
+  // Resume mode
+  if (!resumeData) {
+    console.log("No resume data available");
+    return (
+      <Page mode="preview" pageNumber={1}>
+        <div className="flex items-center justify-center h-64">
+          <p>Loading resume...</p>
+        </div>
+      </Page>
+    );
+  }
+
+  if (!TemplateComponent) {
+    console.error("Resume template not found:", template);
+    return (
+      <Page mode="preview" pageNumber={1}>
+        <div className="flex items-center justify-center h-64">
+          <p>Resume template "{template}" not found</p>
+        </div>
+      </Page>
+    );
+  }
+
   const ResumeTemplate = TemplateComponent as React.ComponentType<TemplateProps>;
+  
   return (
     <>
       {layout.map((columns, pageIndex: number) => (

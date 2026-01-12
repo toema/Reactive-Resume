@@ -1,5 +1,6 @@
 import { useTheme } from "@reactive-resume/hooks";
 import { cn, pageSizeMap } from "@reactive-resume/utils";
+import { useSearchParams } from "react-router-dom";
 
 import { useArtboardStore } from "../store/artboard";
 
@@ -13,9 +14,23 @@ export const MM_TO_PX = 3.78;
 
 export const Page = ({ mode = "preview", pageNumber, children }: Props) => {
   const { isDarkMode } = useTheme();
+  const [searchParams] = useSearchParams();
+  const artboardMode = searchParams.get("mode") ?? "resume";
 
-  const page = useArtboardStore((state) => state.resume.metadata.page);
-  const fontFamily = useArtboardStore((state) => state.resume.metadata.typography.font.family);
+  // Get page settings based on mode
+  const page = useArtboardStore((state) => {
+    if (artboardMode === "portfolio") {
+      return state.portfolio?.metadata?.page || { format: "a4", options: { pageNumbers: false, breakLine: false } };
+    }
+    return state.resume?.metadata?.page || { format: "a4", options: { pageNumbers: false, breakLine: false } };
+  });
+
+  const fontFamily = useArtboardStore((state) => {
+    if (artboardMode === "portfolio") {
+      return state.portfolio?.metadata?.typography?.font?.family || "Inter";
+    }
+    return state.resume?.metadata?.typography?.font?.family || "Inter";
+  });
 
   return (
     <div

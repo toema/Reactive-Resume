@@ -1,24 +1,53 @@
 import { SectionKey } from "@reactive-resume/schema";
-import { pageSizeMap, Template } from "@reactive-resume/utils";
+import { pageSizeMap, Template, PortfolioTemplate } from "@reactive-resume/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef } from "react";
 import { ReactZoomPanPinchRef, TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
+import { useSearchParams } from "react-router-dom";
 
 import { MM_TO_PX, Page } from "../components/page";
 import { useArtboardStore } from "../store/artboard";
 import { getTemplate } from "../templates";
+import { getPortfolioTemplate } from "../templates/portfolio/registry";
+import { PortfolioTemplateProps } from "../templates/portfolio/types";
+import { TemplateProps } from "../types/template";
 
 export const BuilderLayout = () => {
   const transformRef = useRef<ReactZoomPanPinchRef>(null);
-  // Read the full resume object (may be null while loading)
-  const resumeData = useArtboardStore((state) => state.resume);
+  const [searchParams] = useSearchParams();
+  const mode = searchParams.get("mode") ?? "resume";
 
-  // Resolve template key safely so hooks run in the same order every render.
-  const templateKey = (resumeData?.metadata.template as Template) ?? null;
-  const Template = useMemo(() => {
-    if (!templateKey) return () => null;
-    return getTemplate(templateKey);
-  }, [templateKey]);
+  // Get data based on mode
+  const resumeData = useArtboardStore((state) => state.resume);
+  const portfolioData = useArtboardStore((state) => state.portfolio);
+
+  const format = useArtboardStore((state) => {
+    if (mode === "portfolio") {
+      return state.portfolio?.metadata?.page?.format || "a4";
+    }
+    return state.resume?.metadata?.page?.format || "a4";
+  });
+
+  const layout = useArtboardStore((state) => {
+    if (mode === "portfolio") {
+      return state.portfolio?.metadata?.layout?.sections || [];
+    }
+    return state.resume?.metadata?.layout || [];
+  });
+
+  const template = useArtboardStore((state) => {
+    if (mode === "portfolio") {
+      return state.portfolio?.metadata?.template as PortfolioTemplate;
+    }
+    return state.resume?.metadata?.template as Template;
+  });
+
+  const TemplateComponent = useMemo(() => {
+    if (mode === "portfolio") {
+      return getPortfolioTemplate(template as string);
+    }
+    return getTemplate(template as Template);
+  }, [template, mode]);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -40,11 +69,49 @@ export const BuilderLayout = () => {
     };
   }, [transformRef]);
 
-  // If resume data isn't available yet, render nothing (hooks already executed)
-  if (!resumeData) return null;
+  // Portfolio Builder
+  if (mode === "portfolio") {
+    if (!TemplateComponent || !portfolioData) {
+      return (
+        <div className="flex items-center justify-center h-screen">
+          <p>Loading portfolio builder...</p>
+        </div>
+      );
+    }
 
-  const format = resumeData.metadata.page.format;
-  const layout = resumeData.metadata.layout;
+    const PortfolioTemplate = TemplateComponent as React.ComponentType<PortfolioTemplateProps>;
+
+    return (
+      <TransformWrapper
+        ref={transformRef}
+        centerOnInit
+        maxScale={2}
+        minScale={0.4}
+        initialScale={0.8}
+        limitToBounds={false}
+      >
+        <TransformComponent
+          wrapperClass="!w-screen !h-screen"
+          contentClass="flex items-start justify-center pointer-events-none"
+        >
+          <Page mode="builder" pageNumber={1}>
+            <PortfolioTemplate data={portfolioData} />
+          </Page>
+        </TransformComponent>
+      </TransformWrapper>
+    );
+  }
+
+  // Resume Builder
+  if (!TemplateComponent || !resumeData) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>Loading resume builder...</p>
+      </div>
+    );
+  }
+
+  const ResumeTemplate = TemplateComponent as React.ComponentType<TemplateProps>;
 
   return (
     <TransformWrapper
@@ -73,7 +140,7 @@ export const BuilderLayout = () => {
               exit={{ opacity: 0, x: -200 }}
             >
               <Page mode="builder" pageNumber={pageIndex + 1}>
-                <Template isFirstPage={pageIndex === 0} columns={columns as SectionKey[][]} />
+                <ResumeTemplate isFirstPage={pageIndex === 0} columns={columns as SectionKey[][]} />
               </Page>
             </motion.div>
           ))}

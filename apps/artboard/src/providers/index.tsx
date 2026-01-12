@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { Outlet, useSearchParams } from "react-router-dom";
 
 import { useArtboardStore } from "../store/artboard";
+import { MinimalTemplate } from "../templates/portfolio/minimal/index";
 
 export const Providers = () => {
   const [searchParams] = useSearchParams();
@@ -13,44 +14,26 @@ export const Providers = () => {
   const setMode = useArtboardStore((state) => state.setMode);
 
   useEffect(() => {
+    console.log("Providers: Setting mode to", mode);
     setMode(mode);
 
-    const fetchPortfolio = async () => {
-      try {
-        const id = searchParams.get("id");
-        const username = searchParams.get("username");
-        const slug = searchParams.get("slug");
-
-        let res: Response | null = null;
-
-        if (username && slug) {
-          res = await fetch(`/api/portfolio/public/${encodeURIComponent(username)}/${encodeURIComponent(slug)}`);
-        } else if (id) {
-          res = await fetch(`/api/portfolio/${encodeURIComponent(id)}`);
-        }
-
-        if (res && res.ok) {
-          const data = await res.json();
-          // response will be a PortfolioDto; set the nested `data` field into artboard store
-          setPortfolio(data.data || data);
-        }
-      } catch (err) {
-        // silently ignore — artboard can still render defaults or receive postMessage
-        // eslint-disable-next-line no-console
-        console.debug("Failed to fetch portfolio for artboard", err);
-      }
-    };
-
     const handleMessage = (event: MessageEvent) => {
+      // Only accept messages from same origin for security
       if (event.origin !== window.location.origin) return;
+
+      console.log("Artboard received message:", event.data);
 
       switch (event.data.type) {
         case "SET_RESUME": {
-          setResume(event.data.payload || defaultResumeData);
+          const resumeData = event.data.payload || defaultResumeData;
+          console.log("Setting resume data:", resumeData);
+          setResume(resumeData);
           break;
         }
         case "SET_PORTFOLIO": {
-          setPortfolio(event.data.payload || defaultPortfolioData);
+          const portfolioData = event.data.payload || defaultPortfolioData;
+          console.log("Setting portfolio data:", portfolioData);
+          setPortfolio(portfolioData);
           break;
         }
         case "SET_THEME": {
@@ -64,14 +47,18 @@ export const Providers = () => {
 
     // Initialize with schema defaults
     if (mode === "portfolio") {
+      console.log("Initializing with default portfolio data");
       setPortfolio(defaultPortfolioData);
-      // Try to fetch real portfolio if query params provided
-      void fetchPortfolio();
     } else {
+      console.log("Initializing with default resume data");
       setResume(defaultResumeData);
     }
 
     window.addEventListener("message", handleMessage);
+    
+    // Send ready message to parent
+    window.parent.postMessage({ type: "ARTBOARD_READY", mode }, "*");
+
     return () => {
       window.removeEventListener("message", handleMessage);
     };

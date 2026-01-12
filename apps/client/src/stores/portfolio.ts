@@ -46,7 +46,10 @@ export const usePortfolioStore = create<PortfolioStore>()(
             state.portfolio.data = _set(state.portfolio.data, path, value);
           }
 
-          void debouncedUpdatePortfolio(JSON.parse(JSON.stringify(state.portfolio)));
+          // Only update if we have a valid portfolio ID
+          if (state.portfolio.id) {
+            void debouncedUpdatePortfolio(JSON.parse(JSON.stringify(state.portfolio)));
+          }
         });
       },
       addSection: () => {
@@ -67,7 +70,9 @@ export const usePortfolioStore = create<PortfolioStore>()(
             section,
           );
 
-          void debouncedUpdatePortfolio(JSON.parse(JSON.stringify(state.portfolio)));
+          if (state.portfolio.id) {
+            void debouncedUpdatePortfolio(JSON.parse(JSON.stringify(state.portfolio)));
+          }
         });
       },
       removeSection: (sectionId: string) => {
@@ -84,7 +89,9 @@ export const usePortfolioStore = create<PortfolioStore>()(
             // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
             delete state.portfolio.data.sections.custom[id];
 
-            void debouncedUpdatePortfolio(JSON.parse(JSON.stringify(state.portfolio)));
+            if (state.portfolio.id) {
+              void debouncedUpdatePortfolio(JSON.parse(JSON.stringify(state.portfolio)));
+            }
           });
         }
       },

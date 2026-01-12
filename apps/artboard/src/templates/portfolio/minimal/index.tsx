@@ -6,8 +6,28 @@ import { About } from "./components/about";
 
 
 export const MinimalTemplate: React.FC<PortfolioTemplateProps> = ({ data }) => {
-  const { sections } = data;
-  if (!data) return null;
+   console.log("MinimalTemplate rendering with data:", data);
+  
+  if (!data) {
+    console.error("MinimalTemplate: No data provided");
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>No portfolio data available</p>
+      </div>
+    );
+  }
+
+  const { sections, metadata } = data;
+  
+  if (!sections || !metadata) {
+    console.error("MinimalTemplate: Invalid data structure", { sections, metadata });
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>Invalid portfolio data structure</p>
+      </div>
+    );
+  }
+
 
   return (
     <BaseTemplate
@@ -17,7 +37,7 @@ export const MinimalTemplate: React.FC<PortfolioTemplateProps> = ({ data }) => {
       {/* Hero Section */}
       <Hero
         name={data.basics.name}
-        tagline={data.basics.tagline}
+        headline={data.basics.headline}
         picture={data.basics.picture}
         banner={data.basics.banner}
       />
